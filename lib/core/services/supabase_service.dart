@@ -7,15 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseService {
   SupabaseService._();
 
- 
-  
-  static const String _supabaseUrl = 'https://xpjhlskvkyqbfgetbrnn.supabase.co';
-  static const String _supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhwamhsc2t2a3lxYmZnZXRicm5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDcxMTIsImV4cCI6MjA4OTQyMzExMn0.Ne5KZvaeLKzD_Lsg6l6QMbQCCOpP5PUOAUetbf1_66M';
-
-  /// Initialise Supabase — call once in `main()`.
-  static Future<void> init() async {
-    await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
-  }
+  // Initialization is now properly handled in main.dart
 
   /// The global Supabase client instance.
   static SupabaseClient get client => Supabase.instance.client;
