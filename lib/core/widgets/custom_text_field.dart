@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+
+import '../constants/app_constants.dart';
 import '../theme/app_text_styles.dart';
 
-/// Reusable text field widget used across all forms in SquadBizz.
+/// Reusable text field with label, built on top of TextFormField.
+///
+/// Automatically inherits InputDecorationTheme from the current theme.
 class CustomTextField extends StatelessWidget {
   final String label;
   final String? hint;
@@ -14,8 +17,14 @@ class CustomTextField extends StatelessWidget {
   final String? errorText;
   final TextInputType keyboardType;
   final int maxLines;
+  final int? maxLength;
   final bool enabled;
+  final bool readOnly;
   final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final String? counterText;
 
   const CustomTextField({
     super.key,
@@ -29,24 +38,31 @@ class CustomTextField extends StatelessWidget {
     this.errorText,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
+    this.maxLength,
     this.enabled = true,
+    this.readOnly = false,
     this.onChanged,
+    this.onSubmitted,
+    this.focusNode,
+    this.textInputAction,
+    this.counterText,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         // ── Label ──
         Text(
           label,
           style: AppTextStyles.body.copyWith(
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppConstants.spacingSm),
 
         // ── Text Field ──
         TextFormField(
@@ -55,17 +71,25 @@ class CustomTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          maxLength: maxLength,
           enabled: enabled,
+          readOnly: readOnly,
           onChanged: onChanged,
-          style: AppTextStyles.body,
+          onFieldSubmitted: onSubmitted,
+          focusNode: focusNode,
+          textInputAction: textInputAction,
+          style: AppTextStyles.body.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             suffixIcon: suffixIcon,
             prefixIcon: prefixIcon,
             errorText: errorText,
+            counterText: counterText,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppConstants.spacingMd),
       ],
     );
   }
