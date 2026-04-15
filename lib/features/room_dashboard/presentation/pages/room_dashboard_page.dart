@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../chat/presentation/pages/chat_tab.dart';
 import '../../../polls/presentation/pages/polls_tab.dart';
 import '../../../expenses/presentation/pages/expenses_tab.dart';
-import 'feed_tab.dart';
 import 'settings_tab.dart';
 
 /// Inside a Room Dashboard — holds navigation for room-specific features.
@@ -30,7 +30,7 @@ class _RoomDashboardPageState extends State<RoomDashboardPage> {
     final roomName = widget.room['name'] as String? ?? 'Room';
 
     _pages = [
-      FeedTab(roomId: roomId, roomName: roomName),
+      ChatTab(roomId: roomId, roomName: roomName),
       PollsTab(roomId: roomId),
       ExpensesTab(roomId: roomId),
       SettingsTab(room: widget.room),
@@ -84,9 +84,9 @@ class _RoomDashboardPageState extends State<RoomDashboardPage> {
           selectedIndex: _currentIndex,
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.dynamic_feed_outlined),
-              selectedIcon: Icon(Icons.dynamic_feed_rounded),
-              label: 'Feed',
+              icon: Icon(Icons.chat_bubble_outline_rounded),
+              selectedIcon: Icon(Icons.chat_bubble_rounded),
+              label: 'Chat',
             ),
             NavigationDestination(
               icon: Icon(Icons.how_to_vote_outlined),

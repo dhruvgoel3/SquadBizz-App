@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/app_logger.dart';
 import '../../domain/usecases/get_room_polls.dart';
 import '../../domain/usecases/create_poll.dart';
 import '../../domain/usecases/vote_on_poll.dart';
@@ -83,9 +84,25 @@ class PollLoading extends PollState {
 
 class PollLoaded extends PollState {
   final List<Map<String, dynamic>> polls;
-  const PollLoaded(this.polls);
+  final String? votingPollId; // track which poll is being voted on
+  final bool isCreating;
+
+  const PollLoaded(this.polls, {this.votingPollId, this.isCreating = false});
+
+  PollLoaded copyWith({
+    List<Map<String, dynamic>>? polls,
+    String? votingPollId,
+    bool? isCreating,
+  }) {
+    return PollLoaded(
+      polls ?? this.polls,
+      votingPollId: votingPollId,
+      isCreating: isCreating ?? this.isCreating,
+    );
+  }
+
   @override
-  List<Object?> get props => [polls];
+  List<Object?> get props => [polls.length, votingPollId, isCreating];
 }
 
 class PollCreated extends PollState {
@@ -97,10 +114,6 @@ class PollError extends PollState {
   const PollError(this.message);
   @override
   List<Object?> get props => [message];
-}
-
-class PollVoting extends PollState {
-  const PollVoting();
 }
 
 // ══════════════════════════════════════════
@@ -124,6 +137,7 @@ class PollBloc extends Bloc<PollEvent, PollState> {
   }
 
   Future<void> _onLoadPolls(LoadPollsEvent event, Emitter<PollState> emit) async {
+    AppLogger.bloc('PollBloc', 'LoadPolls → ${event.roomId}');
     emit(const PollLoading());
     final result = await getRoomPolls(event.roomId);
     if (result.success) {
@@ -134,6 +148,7 @@ class PollBloc extends Bloc<PollEvent, PollState> {
   }
 
   Future<void> _onRefreshPolls(RefreshPollsEvent event, Emitter<PollState> emit) async {
+    AppLogger.bloc('PollBloc', 'RefreshPolls → ${event.roomId}');
     final result = await getRoomPolls(event.roomId);
     if (result.success) {
       emit(PollLoaded(result.polls));
@@ -143,6 +158,7 @@ class PollBloc extends Bloc<PollEvent, PollState> {
   }
 
   Future<void> _onCreatePoll(CreatePollEvent event, Emitter<PollState> emit) async {
+    AppLogger.bloc('PollBloc', 'CreatePoll → ${event.question}');
     emit(const PollLoading());
     final result = await createPoll(
       roomId: event.roomId,
@@ -153,22 +169,24 @@ class PollBloc extends Bloc<PollEvent, PollState> {
     );
     if (result.success) {
       emit(const PollCreated());
-      // Reload polls
-      final polls = await getRoomPolls(event.roomId);
-      if (polls.success) {
-        emit(PollLoaded(polls.polls));
-      }
     } else {
       emit(PollError(result.error ?? 'Failed to create poll'));
     }
   }
 
   Future<void> _onVote(VoteEvent event, Emitter<PollState> emit) async {
-    emit(const PollVoting());
+    AppLogger.bloc('PollBloc', 'Vote → poll=${event.pollId} option=${event.optionId}');
+
+    // Keep polls visible while voting (don't emit PollLoading!)
+    if (state is PollLoaded) {
+      emit((state as PollLoaded).copyWith(votingPollId: event.pollId));
+    }
+
     final result = await voteOnPoll(
       pollId: event.pollId,
       optionId: event.optionId,
     );
+
     if (result.success) {
       // Reload polls to get updated vote counts
       final polls = await getRoomPolls(event.roomId);
@@ -176,6 +194,10 @@ class PollBloc extends Bloc<PollEvent, PollState> {
         emit(PollLoaded(polls.polls));
       }
     } else {
+      // Keep existing polls, show error via snackbar
+      if (state is PollLoaded) {
+        emit((state as PollLoaded).copyWith(votingPollId: null));
+      }
       emit(PollError(result.error ?? 'Failed to cast vote'));
     }
   }

@@ -66,8 +66,10 @@ class _JoinRoomViewState extends State<_JoinRoomView> {
       listener: (context, state) {
         if (state is RoomJoined) {
           AppSnackbar.success(context, message: 'Successfully joined room!');
-          // Pop the current page to return to home, where it will refresh automatically
-          context.pop(true);
+          // Defer pop to next frame to avoid !_debugLocked error
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.pop(true);
+          });
         } else if (state is RoomJoinError) {
           AppSnackbar.error(context, message: state.message);
         }

@@ -36,6 +36,7 @@ import 'features/expenses/data/repositories/expense_repository_impl.dart';
 import 'features/expenses/domain/repositories/expense_repository.dart';
 import 'features/expenses/domain/usecases/get_room_expenses.dart';
 import 'features/expenses/domain/usecases/create_expense.dart';
+import 'features/expenses/domain/usecases/get_room_members.dart';
 import 'features/expenses/presentation/bloc/expense_bloc.dart';
 
 // ── Feature: Chat ──
@@ -144,11 +145,13 @@ Future<void> initDependencies() async {
   // Use cases
   sl.registerLazySingleton(() => GetRoomExpenses(sl()));
   sl.registerLazySingleton(() => CreateExpense(sl()));
+  sl.registerLazySingleton(() => GetRoomMembers(sl()));
 
   // BLoC
   sl.registerFactory(() => ExpenseBloc(
         getRoomExpenses: sl(),
         createExpense: sl(),
+        getRoomMembers: sl(),
       ));
 
   // ══════════════════════════════════════════

@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/get_room_expenses.dart';
 import '../../domain/usecases/create_expense.dart';
+import '../../domain/usecases/get_room_members.dart';
 
 // ══════════════════════════════════════════
 //  EVENTS
@@ -24,6 +26,13 @@ class LoadExpensesEvent extends ExpenseEvent {
 class RefreshExpensesEvent extends ExpenseEvent {
   final String roomId;
   const RefreshExpensesEvent(this.roomId);
+  @override
+  List<Object?> get props => [roomId];
+}
+
+class LoadRoomMembersEvent extends ExpenseEvent {
+  final String roomId;
+  const LoadRoomMembersEvent(this.roomId);
   @override
   List<Object?> get props => [roomId];
 }
@@ -72,6 +81,13 @@ class ExpenseLoaded extends ExpenseState {
   List<Object?> get props => [expenses];
 }
 
+class RoomMembersLoaded extends ExpenseState {
+  final List<Map<String, dynamic>> members;
+  const RoomMembersLoaded(this.members);
+  @override
+  List<Object?> get props => [members];
+}
+
 class ExpenseCreated extends ExpenseState {
   const ExpenseCreated();
 }
@@ -90,13 +106,16 @@ class ExpenseError extends ExpenseState {
 class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   final GetRoomExpenses getRoomExpenses;
   final CreateExpense createExpense;
+  final GetRoomMembers getRoomMembers;
 
   ExpenseBloc({
     required this.getRoomExpenses,
     required this.createExpense,
+    required this.getRoomMembers,
   }) : super(const ExpenseInitial()) {
     on<LoadExpensesEvent>(_onLoad);
     on<RefreshExpensesEvent>(_onRefresh);
+    on<LoadRoomMembersEvent>(_onLoadMembers);
     on<CreateExpenseEvent>(_onCreate);
   }
 
@@ -117,6 +136,16 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     }
   }
 
+  Future<void> _onLoadMembers(LoadRoomMembersEvent event, Emitter<ExpenseState> emit) async {
+    emit(const ExpenseLoading());
+    final result = await getRoomMembers(event.roomId);
+    if (result.success) {
+      emit(RoomMembersLoaded(result.members));
+    } else {
+      emit(ExpenseError(result.error ?? 'Failed to load room members'));
+    }
+  }
+
   Future<void> _onCreate(CreateExpenseEvent event, Emitter<ExpenseState> emit) async {
     emit(const ExpenseLoading());
     final result = await createExpense(
@@ -128,10 +157,6 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     );
     if (result.success) {
       emit(const ExpenseCreated());
-      final expenses = await getRoomExpenses(event.roomId);
-      if (expenses.success) {
-        emit(ExpenseLoaded(expenses.expenses));
-      }
     } else {
       emit(ExpenseError(result.error ?? 'Failed to create expense'));
     }
