@@ -28,3 +28,12 @@ class CreateRoomEvent extends HomeEvent {
   @override
   List<Object?> get props => [name, description, emoji];
 }
+
+class JoinRoomEvent extends HomeEvent {
+  final String roomCode;
+
+  const JoinRoomEvent(this.roomCode);
+
+  @override
+  List<Object?> get props => [roomCode];
+}

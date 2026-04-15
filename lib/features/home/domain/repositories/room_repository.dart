@@ -10,5 +10,7 @@ abstract class RoomRepository {
     required String emoji,
   });
 
+  Future<({bool success, String? roomId, String? error})> joinRoom(String roomCode);
+
   String get currentUserFirstName;
 }

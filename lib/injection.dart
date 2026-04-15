@@ -18,6 +18,7 @@ import 'features/home/data/repositories/room_repository_impl.dart';
 import 'features/home/domain/repositories/room_repository.dart';
 import 'features/home/domain/usecases/get_user_rooms.dart';
 import 'features/home/domain/usecases/create_room.dart';
+import 'features/home/domain/usecases/join_room.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
 
 final sl = GetIt.instance;
@@ -70,11 +71,13 @@ Future<void> initDependencies() async {
   // Use cases
   sl.registerLazySingleton(() => GetUserRooms(sl()));
   sl.registerLazySingleton(() => CreateRoom(sl()));
+  sl.registerLazySingleton(() => JoinRoom(sl()));
 
   // BLoC
   sl.registerFactory(() => HomeBloc(
         getUserRooms: sl(),
         createRoom: sl(),
+        joinRoom: sl(),
         repository: sl(),
       ));
 }

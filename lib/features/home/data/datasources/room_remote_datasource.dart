@@ -10,6 +10,7 @@ abstract class RoomRemoteDatasource {
     String? description,
     required String emoji,
   });
+  Future<Map<String, dynamic>> joinRoom(String roomCode);
   String get currentUserFirstName;
 }
 
@@ -88,6 +89,47 @@ class RoomRemoteDatasourceImpl implements RoomRemoteDatasource {
     final name = _client.auth.currentUser?.userMetadata?['full_name'] as String?;
     if (name == null || name.isEmpty) return '';
     return name.split(' ').first;
+  }
+
+  @override
+  Future<Map<String, dynamic>> joinRoom(String roomCode) async {
+    final userId = _client.auth.currentUser!.id;
+    AppLogger.api('POST', 'rooms/join → $roomCode');
+
+    // 1. Find the room by code
+    final roomResult = await _client
+        .from('rooms')
+        .select()
+        .eq('room_code', roomCode.toUpperCase())
+        .maybeSingle();
+
+    if (roomResult == null) {
+      throw Exception('Room not found. Please check the code.');
+    }
+
+    final roomId = roomResult['id'] as String;
+
+    // 2. Check if already a member
+    final isMember = await _client
+        .from('room_members')
+        .select()
+        .eq('room_id', roomId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (isMember != null) {
+      throw Exception('You are already a member of this room.');
+    }
+
+    // 3. Add to room_members
+    await _client.from('room_members').insert({
+      'room_id': roomId,
+      'user_id': userId,
+      'role': 'member', // Default role for joined users
+    });
+
+    AppLogger.i('User joined room: $roomId');
+    return roomResult;
   }
 
   String _generateRoomCode() {

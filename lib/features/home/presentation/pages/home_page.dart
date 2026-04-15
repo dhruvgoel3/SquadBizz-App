@@ -372,8 +372,11 @@ class _HomeView extends StatelessWidget {
               icon: Icons.login_rounded,
               label: 'Join Room',
               filled: false,
-              onTap: () {
-                // TODO: Join room
+              onTap: () async {
+                final result = await context.push<bool>(AppRoutes.joinRoom);
+                if (result == true && context.mounted) {
+                  context.read<HomeBloc>().add(const RefreshRoomsEvent());
+                }
               },
             ),
           ),
@@ -433,7 +436,7 @@ class _HomeView extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
           onTap: () {
-            // TODO: Navigate to room dashboard
+            context.push(AppRoutes.roomDashboard, extra: {'room': room});
           },
           child: Padding(
             padding: const EdgeInsets.all(AppConstants.spacingMd),

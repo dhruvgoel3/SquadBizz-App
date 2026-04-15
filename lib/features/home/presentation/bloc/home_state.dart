@@ -53,3 +53,23 @@ class RoomCreateError extends HomeState {
 class RoomCreating extends HomeState {
   const RoomCreating();
 }
+
+class RoomJoined extends HomeState {
+  final String roomId;
+  const RoomJoined(this.roomId);
+
+  @override
+  List<Object?> get props => [roomId];
+}
+
+class RoomJoinError extends HomeState {
+  final String message;
+  const RoomJoinError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class RoomJoining extends HomeState {
+  const RoomJoining();
+}

@@ -47,6 +47,21 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
+  Future<({bool success, String? roomId, String? error})> joinRoom(String roomCode) async {
+    try {
+      final result = await _datasource.joinRoom(roomCode);
+      return (
+        success: true,
+        roomId: result['id'] as String?,
+        error: null,
+      );
+    } catch (e, st) {
+      AppLogger.e('RoomRepository.joinRoom failed', error: e, stackTrace: st);
+      return (success: false, roomId: null, error: _friendlyError(e.toString()));
+    }
+  }
+
+  @override
   String get currentUserFirstName => _datasource.currentUserFirstName;
 
   String _friendlyError(String raw) {

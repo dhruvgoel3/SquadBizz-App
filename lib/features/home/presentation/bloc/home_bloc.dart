@@ -4,26 +4,31 @@ import '../../../../core/utils/app_logger.dart';
 import '../../domain/repositories/room_repository.dart';
 import '../../domain/usecases/get_user_rooms.dart';
 import '../../domain/usecases/create_room.dart';
+import '../../domain/usecases/join_room.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
-/// BLoC for rooms — loading, creating, refreshing.
+/// BLoC for rooms — loading, creating, refreshing, joining.
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final GetUserRooms _getUserRooms;
   final CreateRoom _createRoom;
+  final JoinRoom _joinRoom;
   final RoomRepository _repository;
 
   HomeBloc({
     required GetUserRooms getUserRooms,
     required CreateRoom createRoom,
+    required JoinRoom joinRoom,
     required RoomRepository repository,
   })  : _getUserRooms = getUserRooms,
         _createRoom = createRoom,
+        _joinRoom = joinRoom,
         _repository = repository,
         super(const HomeInitial()) {
     on<LoadRoomsEvent>(_onLoadRooms);
     on<RefreshRoomsEvent>(_onRefreshRooms);
     on<CreateRoomEvent>(_onCreateRoom);
+    on<JoinRoomEvent>(_onJoinRoom);
   }
 
   Future<void> _onLoadRooms(
@@ -87,6 +92,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     } catch (e, st) {
       AppLogger.e('Room create exception', error: e, stackTrace: st);
       emit(RoomCreateError(e.toString()));
+    }
+  }
+
+  Future<void> _onJoinRoom(
+    JoinRoomEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    AppLogger.bloc('HomeBloc', 'JoinRoom → ${event.roomCode}');
+    emit(const RoomJoining());
+    try {
+      final result = await _joinRoom(event.roomCode);
+      if (result.success) {
+        AppLogger.i('Room joined: ${result.roomId}');
+        emit(RoomJoined(result.roomId!));
+      } else {
+        AppLogger.w('Room join failed: ${result.error}');
+        emit(RoomJoinError(result.error ?? 'Failed to join room.'));
+      }
+    } catch (e, st) {
+      AppLogger.e('Room join exception', error: e, stackTrace: st);
+      emit(RoomJoinError(e.toString()));
     }
   }
 }

@@ -6,7 +6,10 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/dashboard/presentation/pages/main_dashboard_page.dart';
 import '../../features/home/presentation/pages/create_room_page.dart';
+import '../../features/home/presentation/pages/join_room_page.dart';
+import '../../features/room_dashboard/presentation/pages/room_dashboard_page.dart';
 
 /// Named route constants for SquadBizz.
 class AppRoutes {
@@ -66,16 +69,32 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
-    // ── Home (Rooms List) ──
+    // ── Main Dashboard (Rooms, Activity, Balances, Profile) ──
     GoRoute(
       path: AppRoutes.home,
-      builder: (context, state) => const HomePage(),
+      builder: (context, state) => const MainDashboardPage(),
     ),
 
     // ── Create Room ──
     GoRoute(
       path: AppRoutes.createRoom,
       builder: (context, state) => const CreateRoomPage(),
+    ),
+
+    // ── Join Room ──
+    GoRoute(
+      path: AppRoutes.joinRoom,
+      builder: (context, state) => const JoinRoomPage(),
+    ),
+
+    // ── Room Dashboard ──
+    GoRoute(
+      path: AppRoutes.roomDashboard,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        final room = extra['room'] as Map<String, dynamic>? ?? {};
+        return RoomDashboardPage(room: room);
+      },
     ),
   ],
 );
