@@ -285,7 +285,33 @@ class _HomeView extends StatelessWidget {
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.add_rounded),
                 label: Text(AppStrings.createRoom, style: AppTextStyles.button),
-                onPressed: () => context.push(AppRoutes.createRoom),
+                onPressed: () async {
+                  final result = await context.push<bool>(AppRoutes.createRoom);
+                  if (result == true && context.mounted) {
+                    context.read<HomeBloc>().add(const RefreshRoomsEvent());
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingMd),
+            SizedBox(
+              width: double.infinity,
+              height: AppConstants.buttonHeight,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.login_rounded, color: AppColors.primary),
+                label: Text('Join Room', style: AppTextStyles.button.copyWith(color: AppColors.primary)),
+                onPressed: () async {
+                  final result = await context.push<bool>(AppRoutes.joinRoom);
+                  if (result == true && context.mounted) {
+                    context.read<HomeBloc>().add(const RefreshRoomsEvent());
+                  }
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  ),
+                ),
               ),
             ),
           ],
@@ -362,7 +388,12 @@ class _HomeView extends StatelessWidget {
               icon: Icons.add_rounded,
               label: '+ Create Room',
               filled: true,
-              onTap: () => context.push(AppRoutes.createRoom),
+              onTap: () async {
+                final result = await context.push<bool>(AppRoutes.createRoom);
+                if (result == true && context.mounted) {
+                  context.read<HomeBloc>().add(const RefreshRoomsEvent());
+                }
+              },
             ),
           ),
           const SizedBox(width: AppConstants.spacingMd),
@@ -421,6 +452,7 @@ class _HomeView extends StatelessWidget {
     final name = room['name'] as String? ?? 'Room';
     final emoji = room['emoji'] as String? ?? '👥';
     final desc = room['description'] as String?;
+    final roomCode = room['room_code'] as String?;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingMd),
@@ -435,8 +467,11 @@ class _HomeView extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-          onTap: () {
-            context.push(AppRoutes.roomDashboard, extra: {'room': room});
+          onTap: () async {
+            await context.push(AppRoutes.roomDashboard, extra: {'room': room});
+            if (context.mounted) {
+              context.read<HomeBloc>().add(const RefreshRoomsEvent());
+            }
           },
           child: Padding(
             padding: const EdgeInsets.all(AppConstants.spacingMd),
@@ -479,6 +514,25 @@ class _HomeView extends StatelessWidget {
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      if (roomCode != null) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.tag_rounded, size: 14,
+                              color: AppColors.primary.withValues(alpha: 0.7)),
+                            const SizedBox(width: 4),
+                            Text(
+                              roomCode,
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ],

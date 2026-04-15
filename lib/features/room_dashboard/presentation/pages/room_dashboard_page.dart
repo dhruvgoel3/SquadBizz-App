@@ -3,6 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../polls/presentation/pages/polls_tab.dart';
+import '../../../expenses/presentation/pages/expenses_tab.dart';
+import 'feed_tab.dart';
+import 'settings_tab.dart';
 
 /// Inside a Room Dashboard — holds navigation for room-specific features.
 class RoomDashboardPage extends StatefulWidget {
@@ -22,11 +26,14 @@ class _RoomDashboardPageState extends State<RoomDashboardPage> {
   @override
   void initState() {
     super.initState();
+    final roomId = widget.room['id'] as String? ?? '';
+    final roomName = widget.room['name'] as String? ?? 'Room';
+
     _pages = [
-      const _PlaceholderRoomTab(title: 'Feed', icon: Icons.dynamic_feed_rounded),
-      const _PlaceholderRoomTab(title: 'Polls', icon: Icons.how_to_vote_rounded),
-      const _PlaceholderRoomTab(title: 'Expenses', icon: Icons.attach_money_rounded),
-      const _PlaceholderRoomTab(title: 'Settings', icon: Icons.settings_rounded),
+      FeedTab(roomId: roomId, roomName: roomName),
+      PollsTab(roomId: roomId),
+      ExpensesTab(roomId: roomId),
+      SettingsTab(room: widget.room),
     ];
   }
 
@@ -87,8 +94,8 @@ class _RoomDashboardPageState extends State<RoomDashboardPage> {
               label: 'Polls',
             ),
             NavigationDestination(
-              icon: Icon(Icons.money_off_csred_outlined),
-              selectedIcon: Icon(Icons.attach_money_rounded),
+              icon: Icon(Icons.receipt_long_outlined),
+              selectedIcon: Icon(Icons.receipt_long_rounded),
               label: 'Expenses',
             ),
             NavigationDestination(
@@ -104,36 +111,6 @@ class _RoomDashboardPageState extends State<RoomDashboardPage> {
           indicatorColor: AppColors.primary.withValues(alpha: 0.15),
           elevation: 0,
         ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderRoomTab extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const _PlaceholderRoomTab({required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 60,
-            color: AppColors.primary.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '$title coming soon',
-            style: AppTextStyles.subtitle.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
       ),
     );
   }

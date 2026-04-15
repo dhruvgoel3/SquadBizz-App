@@ -312,7 +312,7 @@ class _CreateRoomViewState extends State<_CreateRoomView> {
                     height: 48,
                     onTap: () {
                       Navigator.pop(ctx);
-                      context.pop();
+                      context.pop(true); // signal HomePage to refresh
                     },
                   ),
                 ),
