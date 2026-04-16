@@ -20,11 +20,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required RegisterWithEmail registerWithEmail,
     required SendOtp sendOtp,
     required VerifyOtp verifyOtp,
-  })  : _loginWithEmail = loginWithEmail,
-        _registerWithEmail = registerWithEmail,
-        _sendOtp = sendOtp,
-        _verifyOtp = verifyOtp,
-        super(const AuthInitial()) {
+  }) : _loginWithEmail = loginWithEmail,
+       _registerWithEmail = registerWithEmail,
+       _sendOtp = sendOtp,
+       _verifyOtp = verifyOtp,
+       super(const AuthInitial()) {
     on<LoginWithEmailEvent>(_onLoginWithEmail);
     on<RegisterWithEmailEvent>(_onRegisterWithEmail);
     on<SendOtpEvent>(_onSendOtp);
@@ -80,17 +80,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onSendOtp(
-    SendOtpEvent event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onSendOtp(SendOtpEvent event, Emitter<AuthState> emit) async {
     AppLogger.bloc('AuthBloc', 'SendOtp → ${event.phone}');
     emit(const AuthLoading());
 
-    final result = await _sendOtp(
-      phone: event.phone,
-      fullName: event.fullName,
-    );
+    final result = await _sendOtp(phone: event.phone, fullName: event.fullName);
 
     if (result.success) {
       AppLogger.i('OTP sent to ${event.phone}');
@@ -108,10 +102,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AppLogger.bloc('AuthBloc', 'VerifyOtp → ${event.phone}');
     emit(const AuthLoading());
 
-    final result = await _verifyOtp(
-      phone: event.phone,
-      token: event.token,
-    );
+    final result = await _verifyOtp(phone: event.phone, token: event.token);
 
     if (result.success) {
       AppLogger.i('OTP verified for ${event.phone}');
